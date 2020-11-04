@@ -89,7 +89,7 @@ tableDelta = freq * {{.TableSizeOverSampleRate}};
 currentIndex = 0;
 i = 0;
 while i != N {
-  output[i] = sine[i] * tableDelta;
+  output[i] = sine[i];
   i = i + 1
 }
 `
@@ -104,10 +104,9 @@ func main() {
 
 	prelude := CompilePrelude(44100, 12, 1, 32)
 	fmt.Println(prelude)
-	b, err := ir.Compile(prelude)
+	b, err := ir.Compile(prelude, true)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(b)
-	fmt.Println(b.Execute())
+	fmt.Println(b.Execute(true))
 }
