@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"syscall"
 	"text/template"
+	"unsafe"
 
 	"github.com/bspaans/bleep/instruments"
 	"github.com/bspaans/jit-compiler/ir"
 	"github.com/bspaans/jit-compiler/ir/expr"
 	"github.com/bspaans/jit-compiler/ir/shared"
 	"github.com/bspaans/jit-compiler/ir/statements"
+	"github.com/bspaans/jit-compiler/lib"
 )
 
 func CompileGeneratorDef(instrDef *instruments.GeneratorDef) []shared.IR {
@@ -69,14 +72,14 @@ func CompilePrelude(sampleRate, tableSize, generatorCount, nrOfSamples int) []sh
 	}
 
 	return []shared.IR{
+		statements.NewIR_Assignment("output", expr.NewIR_StaticArray(shared.TUint8, outputIR)),
+		//ir.MustParseIR(ir.Stdlib),
 		statements.NewIR_Assignment("sine", expr.NewIR_StaticArray(shared.TUint8, sineTableIR)),
 		statements.NewIR_Assignment("phaseTable", expr.NewIR_StaticArray(shared.TFloat64, phaseTableIR)),
 		statements.NewIR_Assignment("N", expr.NewIR_Uint64(uint64(nrOfSamples))),
 		statements.NewIR_Assignment("freq", expr.NewIR_Float64(440.0)),
-		statements.NewIR_Assignment("output", expr.NewIR_StaticArray(shared.TUint8, outputIR)),
 		ir.MustParseIR(w.String()),
-		statements.NewIR_Assignment("result", expr.NewIR_ArrayIndex(expr.NewIR_Variable("sine"), expr.NewIR_Uint64(1))),
-		statements.NewIR_Return(expr.NewIR_Variable("result")),
+		statements.NewIR_Return(expr.NewIR_Variable("N")),
 	}
 }
 
@@ -89,10 +92,39 @@ tableDelta = freq * {{.TableSizeOverSampleRate}};
 currentIndex = 0;
 i = 0;
 while i != N {
-  output[i] = sine[i];
+  output[i] = uint8(2);
   i = i + 1
 }
 `
+
+func Execute(m lib.MachineCode, debug bool) {
+	mmapFunc, err := syscall.Mmap(
+		-1,
+		0,
+		len(m),
+		syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC, syscall.MAP_PRIVATE|syscall.MAP_ANONYMOUS,
+	)
+	if err != nil {
+		fmt.Printf("mmap err: %v", err)
+	}
+	for i, b := range m {
+		mmapFunc[i] = b
+	}
+	type execFunc func()
+	unsafeFunc := (uintptr)(unsafe.Pointer(&mmapFunc))
+	f := *(*execFunc)(unsafe.Pointer(&unsafeFunc))
+	f()
+	if debug {
+		fmt.Printf("Size   : %d bytes\n\n", len(m))
+	}
+	fmt.Println()
+	for i, byt := range mmapFunc {
+		if i != 0 && i%8 == 0 {
+			fmt.Println()
+		}
+		fmt.Printf(" 0x%02x", byt)
+	}
+}
 
 func main() {
 
@@ -102,11 +134,11 @@ func main() {
 	// compile to machine code
 	// implement callback that updates memory locations (nr of samples) and reads results
 
-	prelude := CompilePrelude(44100, 12, 1, 32)
+	prelude := CompilePrelude(44100, 12, 1, 4)
 	fmt.Println(prelude)
 	b, err := ir.Compile(prelude, true)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(b.Execute(true))
+	Execute(b, true)
 }
