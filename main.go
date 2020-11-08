@@ -79,7 +79,6 @@ func CompilePrelude(sampleRate, tableSize, generatorCount, nrOfSamples int) []sh
 		statements.NewIR_Assignment("N", expr.NewIR_Uint64(uint64(nrOfSamples))),
 		statements.NewIR_Assignment("freq", expr.NewIR_Float64(440.0)),
 		ir.MustParseIR(w.String()),
-		statements.NewIR_Return(expr.NewIR_Variable("N")),
 	}
 }
 
@@ -92,9 +91,9 @@ tableDelta = freq * {{.TableSizeOverSampleRate}};
 currentIndex = 0;
 i = 0;
 while i != N {
-  output[i] = uint8(2);
-  i = i + 1
+  output[i] = sine[i]; i = i + 1
 }
+return output[0]
 `
 
 func Execute(m lib.MachineCode, debug bool) {
@@ -110,12 +109,13 @@ func Execute(m lib.MachineCode, debug bool) {
 	for i, b := range m {
 		mmapFunc[i] = b
 	}
-	type execFunc func()
+	type execFunc func() uint8
 	unsafeFunc := (uintptr)(unsafe.Pointer(&mmapFunc))
 	f := *(*execFunc)(unsafe.Pointer(&unsafeFunc))
-	f()
+	v := f()
 	if debug {
 		fmt.Printf("Size   : %d bytes\n\n", len(m))
+		fmt.Println("Value:", v)
 	}
 	fmt.Println()
 	for i, byt := range mmapFunc {

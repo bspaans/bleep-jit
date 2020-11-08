@@ -33,6 +33,8 @@ github.com/bspaans/jit-compiler v0.0.0-20201106183412-e670c657ea2b h1:yElJ6bLHEl
 github.com/bspaans/jit-compiler v0.0.0-20201106183412-e670c657ea2b/go.mod h1:fDcHFnKzRR0f1YaJugyQ1njz79EYkTutTnMdIwFbK8k=
 github.com/bspaans/jit-compiler v0.0.0-20201106200445-ec3d366cc0e1 h1:ykGzyxBgmKxdR+r05G4dCMm6OuRGb4s2xIICZQau51g=
 github.com/bspaans/jit-compiler v0.0.0-20201106200445-ec3d366cc0e1/go.mod h1:fDcHFnKzRR0f1YaJugyQ1njz79EYkTutTnMdIwFbK8k=
+github.com/bspaans/jit-compiler v0.0.0-20201108205839-e02acea3edc1 h1:sySB0pPt9mXotBXT/JmBw3SCNx72KrIIH+l5CwfS4l8=
+github.com/bspaans/jit-compiler v0.0.0-20201108205839-e02acea3edc1/go.mod h1:fDcHFnKzRR0f1YaJugyQ1njz79EYkTutTnMdIwFbK8k=
 github.com/cjbassi/drawille-go v0.0.0-20190126131713-27dc511fe6fd/go.mod h1:vjcQJUZJYD3MeVGhtZXSMnCHfUNZxsyYzJt90eCYxK4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fogleman/gg v1.2.1-0.20190220221249-0403632d5b90/go.mod h1:R/bRT+9gY/C5z7JzPU0zXsXHKM4/ayA+zqcVNZzPa1k=
